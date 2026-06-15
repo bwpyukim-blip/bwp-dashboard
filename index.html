@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>活動報告ダッシュボード</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/dist/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#fff; --bg2:#f5f5f3; --bg3:#efefec;
+      --text:#1a1a18; --text2:#5f5e5a; --text3:#888780;
+      --border:rgba(0,0,0,0.10); --border2:rgba(0,0,0,0.18);
+      --r-md:8px; --r-lg:12px;
+      --accent:#3C3489; --accent-bg:#EEEDFE;
+    }
+    @media (prefers-color-scheme:dark){:root{
+      --bg:#1c1c1a; --bg2:#252523; --bg3:#2e2e2b;
+      --text:#e8e6df; --text2:#9c9a92; --text3:#6b6a63;
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15);
+      --accent:#AFA9EC; --accent-bg:#26215C;
+    }}
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Meiryo',sans-serif; background:var(--bg3); color:var(--text); min-height:100vh; }
+
+    .site-header { background:var(--bg); border-bottom:0.5px solid var(--border2); padding:0 2rem; display:flex; align-items:center; height:60px; gap:12px; }
+    .logo-dot { width:10px; height:10px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+    .site-header h1 { font-size:17px; font-weight:500; }
+    .site-header p { font-size:13px; color:var(--text3); margin-left:auto; }
+
+    .main { max-width:960px; margin:0 auto; padding:3rem 1.5rem; }
+    .page-title { font-size:13px; color:var(--text3); margin-bottom:6px; letter-spacing:.04em; }
+    .page-heading { font-size:28px; font-weight:500; margin-bottom:8px; }
+    .page-sub { font-size:14px; color:var(--text2); margin-bottom:2.5rem; }
+
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:2.5rem; }
+    .stat { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--r-lg); padding:16px 20px; }
+    .stat-label { font-size:12px; color:var(--text3); margin-bottom:4px; }
+    .stat-val { font-size:28px; font-weight:500; }
+    .c-purple { color:#3C3489; } .c-teal { color:#085041; } .c-amber { color:#633806; }
+    @media(prefers-color-scheme:dark){ .c-purple{color:#AFA9EC;} .c-teal{color:#9FE1CB;} .c-amber{color:#FAC775;} }
+
+    .section-label { font-size:12px; font-weight:500; color:var(--text3); letter-spacing:.06em; margin-bottom:12px; }
+    .univ-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+
+    .univ-card { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--r-lg); padding:1.25rem 1.5rem; text-decoration:none; color:var(--text); display:block; transition:border-color .15s, transform .1s; }
+    .univ-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+    .univ-card-top { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+    .univ-icon { width:40px; height:40px; border-radius:10px; background:var(--accent-bg); display:flex; align-items:center; justify-content:center; font-size:18px; color:var(--accent); flex-shrink:0; }
+    .univ-name { font-size:15px; font-weight:500; }
+    .univ-meta { font-size:12px; color:var(--text3); margin-top:2px; }
+    .univ-stats { display:flex; gap:16px; }
+    .univ-stat { font-size:12px; color:var(--text2); display:flex; align-items:center; gap:4px; }
+    .univ-stat strong { font-size:15px; font-weight:500; color:var(--text); }
+    .univ-arrow { margin-left:auto; color:var(--text3); font-size:16px; }
+
+    .footer { text-align:center; padding:2rem; font-size:12px; color:var(--text3); }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <span class="logo-dot"></span>
+  <h1>活動報告ダッシュボード</h1>
+  <p id="hdr-updated"></p>
+</header>
+<main class="main">
+  <p class="page-title">ACTIVITY REPORT</p>
+  <h2 class="page-heading">支部一覧</h2>
+  <p class="page-sub">大学・支部を選択すると、プロジェクトごとの活動報告を確認できます。</p>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">参加大学数</div><div class="stat-val c-purple" id="s-univ">—</div></div>
+    <div class="stat"><div class="stat-label">総メンバー数</div><div class="stat-val c-teal" id="s-member">—</div></div>
+    <div class="stat"><div class="stat-label">今週の活動報告</div><div class="stat-val c-amber" id="s-week">—</div></div>
+  </div>
+
+  <p class="section-label">大学・支部</p>
+  <div class="univ-grid" id="univ-grid">
+    <div style="color:var(--text3);font-size:14px;padding:1rem">読み込み中...</div>
+  </div>
+</main>
+<footer class="footer">活動報告ダッシュボード — Googleスプレッドシート連携</footer>
+
+<script>
+// ★ 2つのGAS URLを設定してください
+const GAS_LEADER = 'YOUR_LEADER_GAS_URL_HERE';
+const GAS_MEMBER = 'YOUR_MEMBER_GAS_URL_HERE';
+
+// サンプルデータ（GAS未設定時のデモ）
+const SAMPLE_LEADER = [
+  {date:'2025-06-13', university:'〇〇大学', team:'Aチーム', country:'ケニア', project:'農業支援PJ', name:'田中 花子', taskTotal:5, taskDone:4, taskRate:80, plan:'ヒアリングシート作成', do1:'午前中に整理し午後はフォームに落とし込んだ。', do2:'ヒアリングシート完成', check1:'スムーズに分担できた。', check2:'質問数が多すぎる。', action:'次回は10問以内に絞る。', memo:''},
+  {date:'2025-06-13', university:'△△大学', team:'Bチーム', country:'ウガンダ', project:'教育支援PJ', name:'佐藤 健一', taskTotal:3, taskDone:3, taskRate:100, plan:'現地校とのオンライン会議', do1:'事前資料を作成し現地教員3名と議論。', do2:'現地教員との意見交換完了', check1:'具体的ニーズを把握できた。', check2:'通信が不安定だった。', action:'音声バックアップを準備。', memo:''},
+  {date:'2025-06-12', university:'〇〇大学', team:'Aチーム', country:'ケニア', project:'農業支援PJ', name:'鈴木 美咲', taskTotal:4, taskDone:2, taskRate:50, plan:'中間報告書ドラフト', do1:'昨年の報告書を参照し構成案を作成。', do2:'第1-2章ドラフト完成', check1:'早めにフィードバックをもらえた。', check2:'データ収集が遅れている。', action:'担当と今週中にMTG設定。', memo:''},
+  {date:'2025-06-12', university:'□□大学', team:'Cチーム', country:'タンザニア', project:'保健衛生PJ', name:'山田 翔太', taskTotal:6, taskDone:6, taskRate:100, plan:'教材デザイン', do1:'対象年齢に合わせた素材を選定しCanvaで作成。', do2:'教材デザイン完成', check1:'直感的なビジュアルにこだわれた。', check2:'印刷コスト未確認。', action:'現地業者に問合せ。', memo:''},
+];
+const SAMPLE_MEMBER = [
+  {date:'2025-06-13', university:'〇〇大学', grade:'3年', country:'ケニア', project:'農業支援PJ', meeting:'参加', tasks:'ヒアリング設計', taskDone:3, satisfaction:4, motivation:4, workload:3, plan:'ヒアリング項目整理', do1:'午前に項目整理、午後にフォーム作成', do2:'フォーム作成完了', check1:'チームと連携できた', check2:'時間がかかった', action:'次回は事前準備を増やす', memo:'', fullname:'タナカ ハナコ'},
+  {date:'2025-06-13', university:'△△大学', grade:'2年', country:'ウガンダ', project:'教育支援PJ', meeting:'参加', tasks:'資料作成', taskDone:2, satisfaction:5, motivation:5, workload:2, plan:'会議資料作成', do1:'議題まとめと資料作成', do2:'資料完成', check1:'丁寧に作れた', check2:'時間ギリギリだった', action:'早めに着手する', memo:'', fullname:'サトウ ケンイチ'},
+];
+
+let leaderData = [], memberData = [];
+
+async function loadAll() {
+  const useSample = GAS_LEADER === 'YOUR_LEADER_GAS_URL_HERE';
+  if (useSample) {
+    leaderData = SAMPLE_LEADER;
+    memberData = SAMPLE_MEMBER;
+  } else {
+    try {
+      const [lr, mr] = await Promise.all([fetch(GAS_LEADER), fetch(GAS_MEMBER)]);
+      leaderData = (await lr.json()).data || [];
+      memberData = (await mr.json()).data || [];
+    } catch(e) { leaderData = SAMPLE_LEADER; memberData = SAMPLE_MEMBER; }
+  }
+  document.getElementById('hdr-updated').textContent =
+    '最終更新: ' + new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+  renderTop();
+}
+
+function renderTop() {
+  const univs = [...new Set([...leaderData, ...memberData].map(r => r.university))].sort();
+  const weekAgo = Date.now() - 7*86400000;
+  const weekCount = [...leaderData, ...memberData].filter(r => new Date(r.date) >= weekAgo).length;
+  const memberNames = [...new Set(memberData.map(r => r.fullname || r.name).filter(Boolean))];
+
+  document.getElementById('s-univ').textContent = univs.length;
+  document.getElementById('s-member').textContent = memberNames.length || memberData.length;
+  document.getElementById('s-week').textContent = weekCount;
+
+  const grid = document.getElementById('univ-grid');
+  if (!univs.length) { grid.innerHTML = '<div style="color:var(--text3);font-size:14px">データがありません</div>'; return; }
+
+  const ICONS = ['ti-building','ti-school','ti-award','ti-star','ti-heart','ti-flag'];
+  grid.innerHTML = univs.map((u, i) => {
+    const lCount = leaderData.filter(r => r.university === u).length;
+    const mCount = memberData.filter(r => r.university === u).length;
+    const latest = [...leaderData, ...memberData].filter(r => r.university === u).sort((a,b) => new Date(b.date)-new Date(a.date))[0];
+    const daysAgo = latest ? Math.floor((Date.now()-new Date(latest.date))/86400000) : null;
+    const icon = ICONS[i % ICONS.length];
+    const page = 'university.html?u=' + encodeURIComponent(u);
+    return `<a class="univ-card" href="${page}">
+      <div class="univ-card-top">
+        <div class="univ-icon"><i class="ti ${icon}" aria-hidden="true"></i></div>
+        <div>
+          <div class="univ-name">${esc(u)}</div>
+          <div class="univ-meta">${daysAgo === 0 ? '今日更新' : daysAgo === 1 ? '昨日更新' : daysAgo !== null ? `${daysAgo}日前に更新` : '—'}</div>
+        </div>
+        <i class="ti ti-arrow-right univ-arrow" aria-hidden="true"></i>
+      </div>
+      <div class="univ-stats">
+        <div class="univ-stat"><strong>${lCount}</strong> リーダー報告</div>
+        <div class="univ-stat"><strong>${mCount}</strong> メンバー報告</div>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+loadAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>活動報告</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/dist/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#fff; --bg2:#f5f5f3; --bg3:#efefec;
+      --text:#1a1a18; --text2:#5f5e5a; --text3:#888780;
+      --border:rgba(0,0,0,0.10); --border2:rgba(0,0,0,0.18);
+      --r-md:8px; --r-lg:12px;
+      --accent:#3C3489; --accent-bg:#EEEDFE;
+    }
+    @media(prefers-color-scheme:dark){:root{
+      --bg:#1c1c1a; --bg2:#252523; --bg3:#2e2e2b;
+      --text:#e8e6df; --text2:#9c9a92; --text3:#6b6a63;
+      --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.15);
+      --accent:#AFA9EC; --accent-bg:#26215C;
+    }}
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans','Meiryo',sans-serif; background:var(--bg3); color:var(--text); min-height:100vh; }
+
+    /* ヘッダー */
+    .site-header { background:var(--bg); border-bottom:0.5px solid var(--border2); padding:0 1.5rem; display:flex; align-items:center; height:56px; gap:10px; }
+    .back-btn { display:flex; align-items:center; gap:5px; font-size:13px; color:var(--text2); text-decoration:none; padding:5px 8px; border-radius:var(--r-md); transition:background .15s; }
+    .back-btn:hover { background:var(--bg2); }
+    .header-title { font-size:16px; font-weight:500; }
+    .header-right { margin-left:auto; display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text3); }
+    .sync-btn { background:none; border:0.5px solid var(--border2); border-radius:var(--r-md); padding:5px 10px; font-size:12px; color:var(--text2); cursor:pointer; display:flex; align-items:center; gap:4px; transition:background .15s; }
+    .sync-btn:hover { background:var(--bg2); }
+
+    .main { max-width:1200px; margin:0 auto; padding:1.5rem; }
+
+    /* サマリー */
+    .stats { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:1.25rem; }
+    @media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr);}}
+    .stat { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--r-lg); padding:14px 16px; }
+    .stat-label { font-size:12px; color:var(--text3); margin-bottom:4px; }
+    .stat-val { font-size:24px; font-weight:500; }
+    .cv-green{color:#27500A;} .cv-blue{color:#185FA5;} .cv-purple{color:#3C3489;} .cv-amber{color:#633806;} .cv-teal{color:#085041;}
+    @media(prefers-color-scheme:dark){.cv-green{color:#9FE1CB;} .cv-blue{color:#85B7EB;} .cv-purple{color:#AFA9EC;} .cv-amber{color:#FAC775;} .cv-teal{color:#5DCAA5;}}
+
+    /* タブ */
+    .tabs { display:flex; gap:4px; margin-bottom:1.25rem; background:var(--bg2); padding:4px; border-radius:var(--r-lg); width:fit-content; }
+    .tab-btn { padding:7px 18px; border:none; background:none; border-radius:var(--r-md); font-size:13px; color:var(--text2); cursor:pointer; transition:background .15s, color .15s; }
+    .tab-btn.active { background:var(--bg); color:var(--text); font-weight:500; border:0.5px solid var(--border2); }
+
+    /* フィルター */
+    .filters { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--r-lg); padding:12px 16px; margin-bottom:1.25rem; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .search-wrap { flex:1; min-width:180px; position:relative; }
+    .search-wrap i { position:absolute; left:9px; top:50%; transform:translateY(-50%); font-size:15px; color:var(--text3); pointer-events:none; }
+    .filters input, .filters select { font-size:13px; padding:7px 10px; border:0.5px solid var(--border2); border-radius:var(--r-md); background:var(--bg2); color:var(--text); outline:none; transition:border-color .15s; }
+    .filters input { width:100%; padding-left:30px; }
+    .filters input:focus, .filters select:focus { border-color:var(--accent); }
+    .clear-btn { background:none; border:none; font-size:12px; color:var(--text3); cursor:pointer; padding:7px 8px; border-radius:var(--r-md); display:flex; align-items:center; gap:4px; transition:background .15s; }
+    .clear-btn:hover { background:var(--bg2); color:var(--text); }
+    .result-count { margin-left:auto; font-size:12px; color:var(--text3); white-space:nowrap; }
+
+    /* カードグリッド */
+    .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:12px; }
+    .card { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--r-lg); padding:1rem 1.25rem; transition:border-color .15s, transform .1s; }
+    .card:hover { border-color:var(--border2); transform:translateY(-1px); }
+
+    .card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+    .member-info { display:flex; align-items:center; gap:10px; }
+    .avatar { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:500; flex-shrink:0; }
+    .member-name { font-size:14px; font-weight:500; }
+    .member-sub { font-size:12px; color:var(--text3); margin-top:2px; }
+
+    /* バッジ */
+    .badge { font-size:11px; font-weight:500; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+    .badge-leader { background:#EEEDFE; color:#3C3489; }
+    .badge-member { background:#E1F5EE; color:#085041; }
+    @media(prefers-color-scheme:dark){
+      .badge-leader{background:#26215C;color:#AFA9EC;}
+      .badge-member{background:#04342C;color:#9FE1CB;}
+    }
+
+    /* タスクバー */
+    .task-bar-wrap { margin:10px 0; }
+    .task-bar-label { display:flex; justify-content:space-between; font-size:12px; color:var(--text3); margin-bottom:4px; }
+    .task-bar-track { height:5px; background:var(--bg3); border-radius:3px; overflow:hidden; }
+    .task-bar-fill { height:100%; border-radius:3px; transition:width .4s; }
+
+    /* 満足度・モチベーション */
+    .metrics-row { display:flex; gap:12px; margin:8px 0; flex-wrap:wrap; }
+    .metric-item { font-size:12px; color:var(--text2); display:flex; align-items:center; gap:4px; }
+    .metric-dots { display:flex; gap:2px; }
+    .dot { width:8px; height:8px; border-radius:50%; background:var(--bg3); }
+    .dot.on-green { background:#1D9E75; }
+    .dot.on-blue  { background:#378ADD; }
+    .dot.on-amber { background:#BA7517; }
+
+    /* PDCA */
+    .pdca { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0; }
+    .pdca-item { background:var(--bg2); border-radius:var(--r-md); padding:8px 10px; }
+    .pdca-label { font-size:10px; font-weight:500; margin-bottom:3px; }
+    .pdca-text { font-size:12px; color:var(--text); line-height:1.55; }
+    .pdca-p .pdca-label { color:#185FA5; } .pdca-d .pdca-label { color:#27500A; }
+    .pdca-c .pdca-label { color:#633806; } .pdca-a .pdca-label { color:#3C3489; }
+    @media(prefers-color-scheme:dark){
+      .pdca-p .pdca-label{color:#85B7EB;} .pdca-d .pdca-label{color:#9FE1CB;}
+      .pdca-c .pdca-label{color:#FAC775;} .pdca-a .pdca-label{color:#AFA9EC;}
+    }
+    .pdca-full { grid-column:1/-1; }
+
+    .memo-row { font-size:12px; color:var(--text2); background:var(--bg2); border-radius:var(--r-md); padding:7px 10px; margin-top:8px; display:flex; gap:6px; }
+    .card-footer { display:flex; justify-content:space-between; align-items:center; padding-top:10px; border-top:0.5px solid var(--border); margin-top:10px; font-size:12px; color:var(--text3); }
+
+    .no-result { grid-column:1/-1; text-align:center; padding:3rem; color:var(--text3); }
+    .no-result i { font-size:32px; display:block; margin-bottom:10px; }
+    .footer { text-align:center; padding:2rem; font-size:12px; color:var(--text3); }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="back-btn" href="index.html"><i class="ti ti-arrow-left" aria-hidden="true"></i> 一覧に戻る</a>
+  <span style="color:var(--border2)">|</span>
+  <h1 class="header-title" id="hdr-title">—</h1>
+  <div class="header-right">
+    <span id="hdr-updated"></span>
+    <button class="sync-btn" onclick="loadAll()"><i class="ti ti-refresh" aria-hidden="true"></i> 更新</button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="stats">
+    <div class="stat"><div class="stat-label">リーダー報告</div><div class="stat-val cv-purple" id="s-leader">—</div></div>
+    <div class="stat"><div class="stat-label">メンバー報告</div><div class="stat-val cv-teal" id="s-member">—</div></div>
+    <div class="stat"><div class="stat-label">プロジェクト数</div><div class="stat-val cv-blue" id="s-project">—</div></div>
+    <div class="stat"><div class="stat-label">平均タスク達成率</div><div class="stat-val cv-green" id="s-rate">—</div></div>
+    <div class="stat"><div class="stat-label">今週の報告</div><div class="stat-val cv-amber" id="s-week">—</div></div>
+  </div>
+
+  <!-- タブ -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-all"    onclick="switchTab('all')">すべて</button>
+    <button class="tab-btn"        id="tab-leader" onclick="switchTab('leader')">リーダー報告</button>
+    <button class="tab-btn"        id="tab-member" onclick="switchTab('member')">メンバー報告</button>
+  </div>
+
+  <!-- フィルター -->
+  <div class="filters">
+    <div class="search-wrap">
+      <i class="ti ti-search" aria-hidden="true"></i>
+      <input type="text" id="search" placeholder="プロジェクト・活動内容で検索...">
+    </div>
+    <select id="filter-project"><option value="">すべてのプロジェクト</option></select>
+    <select id="filter-date">
+      <option value="">すべての期間</option>
+      <option value="7">直近7日</option>
+      <option value="30">直近30日</option>
+    </select>
+    <button class="clear-btn" onclick="clearFilters()"><i class="ti ti-x" aria-hidden="true"></i> クリア</button>
+    <span class="result-count" id="result-count"></span>
+  </div>
+
+  <div class="cards" id="card-list">
+    <div class="no-result"><i class="ti ti-loader" aria-hidden="true"></i><p>読み込み中...</p></div>
+  </div>
+</main>
+
+<footer class="footer">活動報告ダッシュボード — Googleスプレッドシート連携</footer>
+
+<script>
+// ★ 2つのGAS URLを設定してください
+const GAS_LEADER = 'YOUR_LEADER_GAS_URL_HERE';
+const GAS_MEMBER = 'YOUR_MEMBER_GAS_URL_HERE';
+
+// サンプルデータ
+const SAMPLE_LEADER = [
+  {type:'leader', date:'2025-06-13', university:'〇〇大学', team:'Aチーム', country:'ケニア', project:'農業支援PJ', name:'田中 花子', taskTotal:5, taskDone:4, taskRate:80, plan:'ヒアリングシート作成', do1:'午前中に整理し午後はフォームに落とし込んだ。', do2:'ヒアリングシート完成', check1:'スムーズに分担できた。', check2:'質問数が多すぎる。', action:'次回は10問以内に絞る。', memo:''},
+  {type:'leader', date:'2025-06-12', university:'〇〇大学', team:'Aチーム', country:'ケニア', project:'農業支援PJ', name:'鈴木 美咲', taskTotal:4, taskDone:2, taskRate:50, plan:'中間報告書ドラフト', do1:'昨年の報告書を参照し構成案を作成。', do2:'第1-2章ドラフト完成', check1:'早めにフィードバックをもらえた。', check2:'データ収集が遅れている。', action:'担当と今週中にMTG設定。', memo:''},
+];
+const SAMPLE_MEMBER = [
+  {type:'member', date:'2025-06-13', university:'〇〇大学', grade:'3年', country:'ケニア', project:'農業支援PJ', meeting:'参加', tasks:'ヒアリング設計', taskDone:3, satisfaction:4, motivation:4, workload:3, plan:'ヒアリング項目整理', do1:'午前に項目整理、午後にフォーム作成', do2:'フォーム作成完了', check1:'チームと連携できた', check2:'時間がかかった', action:'次回は事前準備を増やす', memo:'', fullname:'タナカ ハナコ'},
+  {type:'member', date:'2025-06-12', university:'〇〇大学', grade:'2年', country:'ケニア', project:'農業支援PJ', meeting:'不参加', tasks:'資料調査', taskDone:1, satisfaction:3, motivation:3, workload:4, plan:'先行事例の調査', do1:'論文や報告書を5本リサーチした', do2:'先行事例まとめ完了', check1:'効率的に情報収集できた', check2:'英語資料の読解に時間がかかった', action:'英語の専門用語集を作る', memo:'', fullname:'スズキ ミサキ'},
+];
+
+let leaderData = [], memberData = [], currentTab = 'all';
+const univName = new URLSearchParams(location.search).get('u') || '';
+
+async function loadAll() {
+  document.getElementById('hdr-title').textContent = univName || '大学ページ';
+  document.title = (univName || '活動報告') + ' — ダッシュボード';
+
+  const useSample = GAS_LEADER === 'YOUR_LEADER_GAS_URL_HERE';
+  if (useSample) {
+    leaderData = SAMPLE_LEADER.filter(r => !univName || r.university === univName);
+    memberData = SAMPLE_MEMBER.filter(r => !univName || r.university === univName);
+  } else {
+    try {
+      const uParam = univName ? '&university=' + encodeURIComponent(univName) : '';
+      const [lr, mr] = await Promise.all([
+        fetch(GAS_LEADER + '?university=' + encodeURIComponent(univName)),
+        fetch(GAS_MEMBER + '?university=' + encodeURIComponent(univName)),
+      ]);
+      leaderData = ((await lr.json()).data || []).map(r => ({...r, type:'leader'}));
+      memberData = ((await mr.json()).data || []).map(r => ({...r, type:'member'}));
+    } catch(e) {
+      leaderData = SAMPLE_LEADER;
+      memberData = SAMPLE_MEMBER;
+    }
+  }
+
+  document.getElementById('hdr-updated').textContent =
+    '最終更新: ' + new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+  buildProjectFilter();
+  renderStats();
+  render();
+}
+
+function buildProjectFilter() {
+  const all = [...leaderData, ...memberData];
+  const projects = [...new Set(all.map(r => r.project).filter(Boolean))].sort();
+  const sel = document.getElementById('filter-project');
+  const cur = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  projects.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p; o.textContent = p;
+    if (p === cur) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+function renderStats() {
+  const all = [...leaderData, ...memberData];
+  const weekAgo = Date.now() - 7*86400000;
+  const rates = leaderData.filter(r => r.taskRate != null).map(r => Number(r.taskRate));
+  document.getElementById('s-leader').textContent  = leaderData.length;
+  document.getElementById('s-member').textContent  = memberData.length;
+  document.getElementById('s-project').textContent = [...new Set(all.map(r=>r.project).filter(Boolean))].length;
+  document.getElementById('s-rate').textContent    = rates.length ? Math.round(rates.reduce((a,b)=>a+b,0)/rates.length)+'%' : '—';
+  document.getElementById('s-week').textContent    = all.filter(r=>new Date(r.date)>=weekAgo).length;
+}
+
+function getFiltered() {
+  const q    = document.getElementById('search').value.toLowerCase();
+  const proj = document.getElementById('filter-project').value;
+  const days = parseInt(document.getElementById('filter-date').value)||0;
+  let src = currentTab === 'leader' ? leaderData : currentTab === 'member' ? memberData : [...leaderData, ...memberData];
+  return src.filter(r => {
+    const hay = `${r.project}${r.name||r.fullname||''}${r.plan||''}${r.do1||''}${r.do2||''}${r.check1||''}${r.check2||''}${r.action||''}${r.tasks||''}`.toLowerCase();
+    if (q && !hay.includes(q)) return false;
+    if (proj && r.project !== proj) return false;
+    if (days && Math.floor((Date.now()-new Date(r.date))/86400000) > days) return false;
+    return true;
+  }).sort((a,b) => new Date(b.date)-new Date(a.date));
+}
+
+function clearFilters() {
+  ['search','filter-project','filter-date'].forEach(id => document.getElementById(id).value='');
+  render();
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  ['all','leader','member'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t === tab);
+  });
+  render();
+}
+
+const AC = [
+  {bg:'#E6F1FB',text:'#0C447C'},{bg:'#EAF3DE',text:'#27500A'},
+  {bg:'#EEEDFE',text:'#3C3489'},{bg:'#FAEEDA',text:'#633806'},
+  {bg:'#FAECE7',text:'#712B13'},{bg:'#E1F5EE',text:'#085041'},
+];
+function ac(name) { return AC[(name||'').charCodeAt(0)%AC.length]; }
+function initials(name) { return String(name||'').replace(/\s+/g,'').slice(0,2)||'?'; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function daysAgo(d) { const n=Math.floor((Date.now()-new Date(d))/86400000); return n===0?'今日':n===1?'昨日':`${n}日前`; }
+
+function dots(val, max, cls) {
+  if (!val) return '';
+  return Array.from({length:max}, (_,i) => `<span class="dot ${i<val?cls:''}"></span>`).join('');
+}
+
+function pdcaItem(cls, label, text) {
+  if (!text) return '';
+  return `<div class="pdca-item ${cls}"><div class="pdca-label">${label}</div><div class="pdca-text">${esc(text)}</div></div>`;
+}
+
+function makeLeaderCard(r) {
+  const a = ac(r.name);
+  const rate = r.taskRate != null ? Number(r.taskRate) : null;
+  const barColor = rate >= 80 ? '#1D9E75' : rate >= 50 ? '#BA7517' : '#E24B4A';
+  const taskBar = r.taskTotal > 0 ? `
+    <div class="task-bar-wrap">
+      <div class="task-bar-label"><span>タスク達成率</span><span>${esc(r.taskDone)} / ${esc(r.taskTotal)} 件 (${rate}%)</span></div>
+      <div class="task-bar-track"><div class="task-bar-fill" style="width:${rate}%;background:${barColor}"></div></div>
+    </div>` : '';
+  return `<article class="card">
+    <div class="card-top">
+      <div class="member-info">
+        <div class="avatar" style="background:${a.bg};color:${a.text}">${esc(initials(r.name))}</div>
+        <div>
+          <div class="member-name">${esc(r.name)}</div>
+          <div class="member-sub"><i class="ti ti-flag" style="font-size:11px" aria-hidden="true"></i> ${esc(r.country)} ／ ${esc(r.team||'')}</div>
+        </div>
+      </div>
+      <span class="badge badge-leader">リーダー</span>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:6px;display:flex;align-items:center;gap:4px">
+      <i class="ti ti-folder" aria-hidden="true"></i>${esc(r.project)}
+    </div>
+    ${taskBar}
+    <div class="pdca">
+      ${pdcaItem('pdca-p','P：今日の目標', r.plan)}
+      ${pdcaItem('pdca-d pdca-full','D：活動内容', r.do1)}
+      ${pdcaItem('pdca-c','C：よかった点', r.check1)}
+      ${pdcaItem('pdca-c','C：課題', r.check2)}
+      ${pdcaItem('pdca-a pdca-full','A：次回への改善', r.action)}
+    </div>
+    ${r.memo ? `<div class="memo-row"><i class="ti ti-message-circle" style="font-size:13px;flex-shrink:0" aria-hidden="true"></i><span>${esc(r.memo)}</span></div>` : ''}
+    <div class="card-footer">
+      <span><i class="ti ti-calendar" style="font-size:12px" aria-hidden="true"></i> ${esc(r.date)}</span>
+      <span>${daysAgo(r.date)}</span>
+    </div>
+  </article>`;
+}
+
+function makeMemberCard(r) {
+  const name = r.fullname || r.name || 'メンバー';
+  const a = ac(name);
+  const taskDone = Number(r.taskDone)||0;
+  return `<article class="card">
+    <div class="card-top">
+      <div class="member-info">
+        <div class="avatar" style="background:${a.bg};color:${a.text}">${esc(initials(name))}</div>
+        <div>
+          <div class="member-name">${esc(name)}</div>
+          <div class="member-sub">${esc(r.grade||'')} ／ <i class="ti ti-flag" style="font-size:11px" aria-hidden="true"></i> ${esc(r.country||'')}</div>
+        </div>
+      </div>
+      <span class="badge badge-member">メンバー</span>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:4px">
+      <i class="ti ti-folder" aria-hidden="true"></i>${esc(r.project)}
+    </div>
+    <div class="metrics-row">
+      ${r.satisfaction ? `<div class="metric-item"><i class="ti ti-mood-smile" style="font-size:13px" aria-hidden="true"></i> 満足度 <div class="metric-dots">${dots(r.satisfaction,5,'on-green')}</div></div>` : ''}
+      ${r.motivation  ? `<div class="metric-item"><i class="ti ti-flame" style="font-size:13px" aria-hidden="true"></i> モチベ <div class="metric-dots">${dots(r.motivation,5,'on-blue')}</div></div>` : ''}
+      ${r.workload    ? `<div class="metric-item"><i class="ti ti-load-balancer" style="font-size:13px" aria-hidden="true"></i> 負荷 <div class="metric-dots">${dots(r.workload,5,'on-amber')}</div></div>` : ''}
+    </div>
+    ${taskDone > 0 ? `<div style="font-size:12px;color:var(--text2);margin-bottom:6px"><i class="ti ti-check" aria-hidden="true"></i> 完了タスク: ${taskDone}件</div>` : ''}
+    <div class="pdca">
+      ${pdcaItem('pdca-p','P：今日の目標', r.plan)}
+      ${pdcaItem('pdca-d pdca-full','D：活動内容', r.do1)}
+      ${pdcaItem('pdca-c','C：よかった点', r.check1)}
+      ${pdcaItem('pdca-c','C：課題', r.check2)}
+      ${pdcaItem('pdca-a pdca-full','A：次回への改善', r.action)}
+    </div>
+    ${r.memo ? `<div class="memo-row"><i class="ti ti-message-circle" style="font-size:13px;flex-shrink:0" aria-hidden="true"></i><span>${esc(r.memo)}</span></div>` : ''}
+    <div class="card-footer">
+      <span><i class="ti ti-calendar" style="font-size:12px" aria-hidden="true"></i> ${esc(r.date)}</span>
+      <span>${daysAgo(r.date)}</span>
+    </div>
+  </article>`;
+}
+
+function render() {
+  const list = getFiltered();
+  const el   = document.getElementById('card-list');
+  el.innerHTML = list.length
+    ? list.map(r => r.type === 'leader' ? makeLeaderCard(r) : makeMemberCard(r)).join('')
+    : `<div class="no-result"><i class="ti ti-search" aria-hidden="true"></i><p>条件に一致する報告がありません</p></div>`;
+  document.getElementById('result-count').textContent = `${list.length} 件`;
+}
+
+['search','filter-project','filter-date'].forEach(id => {
+  document.getElementById(id).addEventListener('input',  render);
+  document.getElementById(id).addEventListener('change', render);
+});
+
+loadAll();
+</script>
+</body>
+</html>
